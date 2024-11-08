@@ -1,13 +1,18 @@
 import { useState } from 'react';
-import { AiOutlineUser } from "react-icons/ai";
 import { TbArrowsShuffle } from "react-icons/tb";
 import { RiShoppingCartLine } from "react-icons/ri";
 import { GoHeart } from "react-icons/go";
-import AuthSlider from "./AuthSlider";
+import { LogOut, User } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../redux/store/store';
+import { removeUserInfo } from '../../redux/userSlice/userSlice';
+import AuthSlider from './AuthSlider';
+
 
 const Header = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-
+  const userInfo = useSelector((state: RootState) => state?.auth?.userInfo);
+  const dispatch = useDispatch()
   const handleUserAuthIcon = () => {
     setIsAuthOpen(true);
   };
@@ -16,10 +21,14 @@ const Header = () => {
     setIsAuthOpen(false);
   };
 
+  const handleLogout = () => {
+    dispatch(removeUserInfo())
+    console.log('Logging out...');
+  };
+
   return (
     <>
-      <header className="bg-purple-200 shadow relative z-10">
-        {/* Your existing header content */}
+      <header className="bg-purple-200 w-full shadow relative z-10">
         <div className="container mx-auto py-2">
           <div className="flex items-center justify-between">
             {/* Categories Button */}
@@ -53,12 +62,27 @@ const Header = () => {
             </div>
 
             <div className="flex items-center space-x-4">
-              <button 
-                className="focus:outline-none bg-white p-2 rounded-full"
-                onClick={handleUserAuthIcon}
-              >
-                <AiOutlineUser className="h-6 w-6" />
-              </button>
+              {userInfo ? (
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center bg-white px-3 py-2 rounded-full">
+                    <User className="h-5 w-5 text-gray-600 mr-2" />
+                    <span className="text-gray-700 font-medium">Welcome {userInfo.name}</span>
+                  </div>
+                  <button 
+                    onClick={handleLogout}
+                    className="focus:outline-none bg-white p-2 rounded-full hover:bg-red-100 transition-colors"
+                  >
+                    <LogOut className="h-5 w-5 text-red-600" />
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  className="focus:outline-none bg-white p-2 rounded-full"
+                  onClick={handleUserAuthIcon}
+                >
+                  <User className="h-6 w-6" />
+                </button>
+              )}
               <button className="focus:outline-none bg-white p-2 rounded-full relative">
                 <TbArrowsShuffle className="h-6 w-6" />
                 <span className="absolute -top-1 -right-1 bg-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium border-2 border-purple-200">
