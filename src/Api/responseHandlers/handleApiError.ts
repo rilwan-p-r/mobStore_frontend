@@ -10,7 +10,7 @@ export const handleApiError = (error: unknown): Response => {
         
         return {
             success: false,
-            error: axiosError.response?.data?.message || axiosError.message,
+            error: axiosError.response?.data?.error || axiosError.response?.data?.message || axiosError.message,
             status: axiosError.response?.status
         };
     } else {

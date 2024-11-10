@@ -1,19 +1,28 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
-import userReducer from '../userSlice/userSlice';
+import userReducer from '../slices/userSlice';
+import cartReducer from '../slices/cartSlice';
 
-const persistConfig = {
-    key: 'root',
+const userPersistConfig = {
+    key: 'auth',
     storage,
     whitelist: ['userInfo'],
 };
 
-const persistedReducer = persistReducer(persistConfig, userReducer);
+const cartPersistConfig = {
+    key: 'cart',
+    storage,
+    whitelist: ['cartCount', 'cartTotal'],
+};
+
+const persistedUserReducer = persistReducer(userPersistConfig, userReducer);
+const persistedCartReducer = persistReducer(cartPersistConfig, cartReducer);
 
 export const store = configureStore({
     reducer: {
-        auth: persistedReducer
+        auth: persistedUserReducer,
+        cart: persistedCartReducer
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

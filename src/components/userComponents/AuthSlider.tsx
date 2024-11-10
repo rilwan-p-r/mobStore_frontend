@@ -7,7 +7,7 @@ import { SignupValues } from '../../interfaces/SignupValues.interface';
 import { message } from 'antd';
 import { signIn, signUp } from '../../Api/user/userAuth';
 import { useDispatch } from 'react-redux';
-import { setUserInfo } from '../../redux/userSlice/userSlice';
+import { setUserInfo } from '../../redux/slices/userSlice';
 import { signInValues } from '../../interfaces/SignInValues.interface';
 
 interface AuthSliderProps {
@@ -28,7 +28,7 @@ const AuthSlider: React.FC<AuthSliderProps> = ({ isOpen, onClose }) => {
     onSubmit: async (values, { resetForm }) => {
       try {
         const response = await signIn(values);
-        if (response.success && response.status === 201) {
+        if (response.success && response.status === 200) {
           message.success('Logged in successfully');
           dispatch(setUserInfo(response?.data));
           resetForm();

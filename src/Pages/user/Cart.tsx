@@ -1,117 +1,133 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store/store';
 import { getCartProducts } from '../../Api/user/getCartProducts';
-import type { Cart } from '../../interfaces/CartInterface';
-import { updateCart } from '../../Api/user/updateCart';
+import type { Cart as CartType } from '../../interfaces/CartInterface';
+import { message } from 'antd';
+import EmptyCart from '../../components/userComponents/EmptyCart';
+import Header from '../../components/userComponents/Header';
+import { CartItem } from '../../components/userComponents/CartItems';
+import { useNavigate } from 'react-router-dom';
+import CheckoutModal from '../../components/userComponents/CheckoutModal';
 
-
-// Cart Component
 const Cart = () => {
-  const [cartProducts, setCartProducts] = useState<Cart | null>(null);
+  const [cartProducts, setCartProducts] = useState<CartType | null>(null);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate()
   const userInfo = useSelector((state: RootState) => state?.auth?.userInfo);
-
   useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        const response = await getCartProducts(userInfo?._id);
-        if (response.success) {
-          setCartProducts(response.data);
-        }
-      } catch (error) {
-        console.error('Error fetching cart:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (userInfo) {
-      fetchCart();
+    if (!userInfo) {
+      navigate('/');
     }
-  }, [userInfo]);
+  }, [userInfo, navigate]);
 
-  const handleQuantityChange = async (productId: string, quantity: number) => {
+  const fetchCart = useCallback(async () => {
+    if (!userInfo?._id) return;
+
     try {
-      const response = await updateCart(productId,quantity);
+      setLoading(true);
+      const response = await getCartProducts(userInfo?._id);
       if (response?.success) {
-        setCartProducts(response.data);
+        setCartProducts(response?.data);
       }
     } catch (error) {
-      console.error('Error updating quantity:', error);
+      console.error('Error fetching cart:', error);
+      message.error('Failed to fetch cart items');
+    } finally {
+      setLoading(false);
     }
+  }, [userInfo?._id]);
+
+  useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
+
+  const handleCartUpdate = (updatedCart: CartType) => {
+    setCartProducts(updatedCart);
+    console.log('updatedCart', updatedCart);
+
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[200px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-950"></div>
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-600"></div>
       </div>
     );
   }
 
-  if (!cartProducts || cartProducts.products.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold text-gray-700">Your cart is empty</h2>
-        <p className="text-gray-500 mt-2">Add some products to start shopping!</p>
-      </div>
-    );
+  if (!cartProducts?.products || cartProducts?.products.length === 0) {
+    return <EmptyCart />;
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Shopping Cart</h2>
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="divide-y divide-gray-200">
-          {cartProducts.products.map((item) => (
-            <div key={item.productId._id} className="p-6 flex items-center">
-              <img
-                src={item.productId.imageUrl}
-                alt={item.productId.name}
-                className="w-24 h-24 object-cover rounded"
-              />
-              <div className="ml-6 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {item.productId.name}
-                </h3>
-                <p className="text-purple-950 font-bold mt-1">
-                  ₹{item.productId.price.toFixed(2)}
-                </p>
-              </div>
-              <div className="ml-6">
-                <select
-                  value={item.quantity}
-                  onChange={(e) => handleQuantityChange(item.productId._id, Number(e.target.value))}
-                  className="block w-20 rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-                >
-                  {[1, 2, 3, 4, 5].map((num) => (
-                    <option key={num} value={num}>
-                      {num}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="ml-6 text-right">
-                <p className="text-lg font-semibold text-gray-900">
-                  ₹{(item.productId.price * item.quantity).toFixed(2)}
-                </p>
-              </div>
-            </div>
-          ))}
+    <>
+      <Header />
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-3xl font-bold text-gray-900">Shopping Cart</h2>
+          <p className="text-lg text-gray-600">
+            {cartProducts?.products?.length} {cartProducts?.products?.length === 1 ? 'item' : 'items'}
+          </p>
         </div>
-        <div className="bg-gray-50 p-6">
-          <div className="flex justify-between items-center">
-            <span className="text-xl font-semibold text-gray-900">Total:</span>
-            <span className="text-2xl font-bold text-purple-950">
-              ₹{cartProducts.totalPrice.toFixed(2)}
-            </span>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+              {cartProducts?.products?.map((item) => (
+                <CartItem
+                  key={item?.productId?._id}
+                  item={item}
+                  onCartUpdate={handleCartUpdate}
+                />
+              ))}
+            </div>
           </div>
-          <button className="mt-4 w-full bg-purple-950 text-white py-3 px-4 rounded-md hover:bg-purple-900 transition-colors duration-200">
-            Proceed to Checkout
-          </button>
+
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-4">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Order Summary</h3>
+
+              <div className="space-y-4">
+                <div className="flex justify-between text-gray-600">
+                  <span>Subtotal</span>
+                  <span>₹{cartProducts?.totalPrice || '0.00'}</span>
+                </div>
+                <div className="flex justify-between text-gray-600">
+                  <span>Shipping</span>
+                  <span>Free</span>
+                </div>
+                <div className="h-px bg-gray-200 my-4"></div>
+                <div className="flex justify-between text-xl font-bold text-gray-900">
+                  <span>Total</span>
+                  <span>
+                    {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(cartProducts?.totalPrice || 0)}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsCheckoutModalOpen(true)}
+                className="w-full mt-8 bg-purple-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-purple-700 transform transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+              >
+                Proceed to Checkout
+              </button>
+
+              <p className="text-center text-gray-500 text-sm mt-4">
+                Free shipping on all orders
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+      <CheckoutModal
+        isOpen={isCheckoutModalOpen}
+        onClose={() => setIsCheckoutModalOpen(false)}
+        totalAmount={cartProducts?.totalPrice || 0}
+        products={cartProducts?.products || []}
+      />
+    </>
   );
 };
 

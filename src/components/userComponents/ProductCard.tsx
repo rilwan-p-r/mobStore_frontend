@@ -2,16 +2,18 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getProducts } from '../../Api/user/getProduct';
 import { Product } from '../../interfaces/Product.interface';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../redux/store/store';
 import AuthSlider from './AuthSlider';
 import { addProductToCart } from '../../Api/user/addProductToCart';
 import { getCartProducts } from '../../Api/user/getCartProducts';
 import ProductSkelton from './ProductSkelton';
 import HoverButtons from './HoverButtons';
+import { setCartInfo } from '../../redux/slices/cartSlice';
 
 const ProductCard = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch()
   const [products, setProducts] = useState<Product[]>([]);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [cartProductIds, setCartProductIds] = useState<string[]>([]);
@@ -22,6 +24,7 @@ const ProductCard = () => {
   const fetchCartProducts = useCallback(async () => {
     if (!userInfo?._id) {
       setCartProductIds([]);
+      dispatch(setCartInfo({ count: 0, total: 0 }));
       return;
     }
 
@@ -31,14 +34,20 @@ const ProductCard = () => {
         const cart = response?.data;
         const productIds = cart?.products?.map(item => item?.productId?._id);
         setCartProductIds(productIds);
+        dispatch(setCartInfo({ 
+          count: cart?.products?.length, 
+          total: cart?.totalPrice || 0 
+        }));
       } else {
         setCartProductIds([]);
+        dispatch(setCartInfo({ count: 0, total: 0 }));
       }
     } catch (error) {
       console.error('Error fetching cart:', error);
       setCartProductIds([]);
+      dispatch(setCartInfo({ count: 0, total: 0 }));
     }
-  }, [userInfo?._id]);
+  }, [userInfo?._id, dispatch]);
     
   const initializeData = useCallback(async () => {
     setIsInitialLoading(true);
@@ -48,6 +57,7 @@ const ProductCard = () => {
       }
 
       const productsResponse = await getProducts();
+      console.log(productsResponse);
       if (productsResponse?.success) {
         setProducts(productsResponse?.data);
       }

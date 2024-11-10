@@ -5,16 +5,18 @@ import { GoHeart } from "react-icons/go";
 import { LogOut, User } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../redux/store/store';
-import { removeUserInfo } from '../../redux/userSlice/userSlice';
+import { removeUserInfo } from '../../redux/slices/userSlice';
 import AuthSlider from './AuthSlider';
 import { useNavigate } from 'react-router-dom';
-
+import { Popconfirm } from 'antd';
+import { clearCart } from '../../redux/slices/cartSlice';
 
 const Header = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const userInfo = useSelector((state: RootState) => state?.auth?.userInfo);
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
+  const { cartCount, cartTotal } = useSelector((state: RootState) => state.cart)
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleUserAuthIcon = () => {
     setIsAuthOpen(true);
@@ -25,8 +27,18 @@ const Header = () => {
   };
 
   const handleLogout = () => {
-    dispatch(removeUserInfo())
+    dispatch(removeUserInfo());
+    dispatch(clearCart());
+    navigate('/')
     console.log('Logging out...');
+  };
+
+  const handleCartClick = () => {
+    if (userInfo) {
+      navigate('/Cart');
+    } else {
+      setIsAuthOpen(true);
+    }
   };
 
   return (
@@ -71,12 +83,20 @@ const Header = () => {
                     <User className="h-5 w-5 text-gray-600 mr-2" />
                     <span className="text-gray-700 font-medium">Welcome {userInfo.name}</span>
                   </div>
-                  <button
-                    onClick={handleLogout}
-                    className="focus:outline-none bg-white p-2 rounded-full hover:bg-red-100 transition-colors"
+                  <Popconfirm
+                    title="Logout"
+                    description="Are you sure you want to logout?"
+                    onConfirm={handleLogout}
+                    okText="Yes"
+                    cancelText="No"
+                    okButtonProps={{ danger: true }}
                   >
-                    <LogOut className="h-5 w-5 text-red-600" />
-                  </button>
+                    <button
+                      className="focus:outline-none bg-white p-2 rounded-full hover:bg-red-100 transition-colors"
+                    >
+                      <LogOut className="h-5 w-5 text-red-600" />
+                    </button>
+                  </Popconfirm>
                 </div>
               ) : (
                 <button
@@ -98,13 +118,13 @@ const Header = () => {
                   0
                 </span>
               </button>
-              <button onClick={() => navigate('/Cart')} className="focus:outline-none bg-purple-950 p-2 rounded-full relative">
+              <button onClick={handleCartClick} className="focus:outline-none bg-purple-950 p-2 rounded-full relative">
                 <RiShoppingCartLine className="h-6 w-6 text-yellow-500" />
                 <span className="absolute -top-1 -right-1 bg-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium border-2 border-purple-200">
-                  0
+                  {cartCount}
                 </span>
               </button>
-              <span className="text-gray-600 font-medium">₹0.00</span>
+              <span className="text-gray-600 font-medium">₹{cartTotal.toFixed(2)}</span>
             </div>
           </div>
         </div>
