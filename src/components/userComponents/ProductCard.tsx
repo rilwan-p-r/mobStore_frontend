@@ -34,9 +34,9 @@ const ProductCard = () => {
         const cart = response?.data;
         const productIds = cart?.products?.map(item => item?.productId?._id);
         setCartProductIds(productIds);
-        dispatch(setCartInfo({ 
-          count: cart?.products?.length, 
-          total: cart?.totalPrice || 0 
+        dispatch(setCartInfo({
+          count: cart?.products?.length,
+          total: cart?.totalPrice || 0
         }));
       } else {
         setCartProductIds([]);
@@ -48,7 +48,7 @@ const ProductCard = () => {
       dispatch(setCartInfo({ count: 0, total: 0 }));
     }
   }, [userInfo?._id, dispatch]);
-    
+
   const initializeData = useCallback(async () => {
     setIsInitialLoading(true);
     try {
@@ -77,9 +77,9 @@ const ProductCard = () => {
       setIsAuthOpen(true);
       return;
     }
-  
+
     setLoadingProductIds(prev => new Set([...prev, productId]));
-  
+
     try {
       const response = await addProductToCart(productId);
       if (response?.success) {
@@ -96,13 +96,13 @@ const ProductCard = () => {
         return newSet;
       });
     }
-  };  
+  };
 
   return (
     <>
       {isInitialLoading && <ProductSkelton />}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {products?.map((product) => {
           const isInCart = cartProductIds?.includes(product?._id);
           const isLoading = loadingProductIds?.has(product?._id);
@@ -118,16 +118,15 @@ const ProductCard = () => {
                   alt={product?.name}
                   className="w-full h-48 object-cover transition-opacity group-hover:opacity-90"
                 />
-
                 <HoverButtons />
               </div>
 
               <div className="p-4">
-                <h3 className="text-gray-900 font-bold text-lg mb-2">
+                <h3 className="text-gray-900 font-bold text-base md:text-lg mb-2 line-clamp-2">
                   {product?.name}
                 </h3>
                 <div className="flex items-center justify-between">
-                  <span className="text-purple-950 font-bold text-base">
+                  <span className="text-purple-950 font-bold text-sm md:text-base">
                     ₹{`${product?.price}.00`}
                   </span>
                 </div>
@@ -135,7 +134,7 @@ const ProductCard = () => {
                 {isInCart ? (
                   <button
                     onClick={() => navigate('/cart')}
-                    className="mt-4 w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors duration-200"
+                    className="mt-4 w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors duration-200 text-sm md:text-base"
                   >
                     Go to Cart
                   </button>
@@ -143,7 +142,7 @@ const ProductCard = () => {
                   <button
                     onClick={() => handleAddToCart(product?._id)}
                     disabled={isLoading}
-                    className={`mt-4 w-full bg-purple-950 text-white py-2 px-4 rounded hover:bg-purple-900 transition-colors duration-200 ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+                    className={`mt-4 w-full bg-purple-950 text-white py-2 px-4 rounded hover:bg-purple-900 transition-colors duration-200 text-sm md:text-base ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
                   >
                     {isLoading ? 'Adding...' : 'Add To Cart'}
                   </button>
@@ -154,12 +153,8 @@ const ProductCard = () => {
         })}
       </div>
 
-      <AuthSlider
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-      />
+      <AuthSlider isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
     </>
   );
 };
-
 export default ProductCard;
