@@ -51,7 +51,7 @@ const Header = () => {
         <div className="container mx-auto py-2 px-4">
           <div className="flex items-center justify-between">
             {/* Mobile Menu Button */}
-            <button 
+            <button
               className="lg:hidden focus:outline-none"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
@@ -59,12 +59,11 @@ const Header = () => {
             </button>
 
             {/* Categories and Navigation */}
-            <div className={`lg:flex items-center space-x-8 ${
-              isMobileMenuOpen 
-                ? 'absolute left-0 top-full w-full bg-purple-200 p-4 shadow-lg border-t border-purple-300' 
+            <div className={`lg:flex items-center space-x-8 ${isMobileMenuOpen
+                ? 'absolute left-0 top-full w-full bg-purple-200 p-4 shadow-lg border-t border-purple-300'
                 : 'hidden'
-            }`}>
-              <button onClick={()=>navigate('/')} className="flex items-center space-x-1 bg-white rounded-full px-0.5 py-1 w-full lg:w-auto mb-2 lg:mb-0">
+              }`}>
+              <button onClick={() => navigate('/')} className="flex items-center space-x-1 bg-white rounded-full px-0.5 py-1 w-full lg:w-auto mb-2 lg:mb-0">
                 <div className="bg-purple-950 rounded-full p-1.5">
                   <div className="w-6 h-6 grid grid-cols-2 gap-0.5 p-0.5">
                     <div className="border border-yellow-500 rounded-sm"></div>
@@ -115,7 +114,7 @@ const Header = () => {
                   <User className="h-5 w-5 sm:h-6 sm:w-6" />
                 </button>
               )}
-              
+
               <div className="flex items-center space-x-2 sm:space-x-4">
                 <button className="hidden sm:block focus:outline-none bg-white p-2 rounded-full relative">
                   <TbArrowsShuffle className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -129,8 +128,8 @@ const Header = () => {
                     0
                   </span>
                 </button>
-                <button 
-                  onClick={handleCartClick} 
+                <button
+                  onClick={handleCartClick}
                   className="focus:outline-none bg-purple-950 p-2 rounded-full relative"
                 >
                   <RiShoppingCartLine className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-500" />

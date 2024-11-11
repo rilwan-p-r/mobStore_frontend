@@ -13,7 +13,7 @@ import { setCartInfo } from '../../redux/slices/cartSlice';
 
 const ProductCard = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [products, setProducts] = useState<Product[]>([]);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [cartProductIds, setCartProductIds] = useState<string[]>([]);
@@ -21,6 +21,7 @@ const ProductCard = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const userInfo = useSelector((state: RootState) => state?.auth?.userInfo);
 
+  // Existing fetch functions remain the same
   const fetchCartProducts = useCallback(async () => {
     if (!userInfo?._id) {
       setCartProductIds([]);
@@ -34,9 +35,9 @@ const ProductCard = () => {
         const cart = response?.data;
         const productIds = cart?.products?.map(item => item?.productId?._id);
         setCartProductIds(productIds);
-        dispatch(setCartInfo({ 
-          count: cart?.products?.length, 
-          total: cart?.totalPrice || 0 
+        dispatch(setCartInfo({
+          count: cart?.products?.length,
+          total: cart?.totalPrice || 0
         }));
       } else {
         setCartProductIds([]);
@@ -48,7 +49,8 @@ const ProductCard = () => {
       dispatch(setCartInfo({ count: 0, total: 0 }));
     }
   }, [userInfo?._id, dispatch]);
-    
+
+  // Existing fetch and initialization functions remain the same
   const fetchProducts = useCallback(async () => {
     try {
       const productsResponse = await getProducts();
@@ -74,12 +76,10 @@ const ProductCard = () => {
     }
   }, [userInfo, fetchCartProducts, fetchProducts]);
 
-  // Initial data load
   useEffect(() => {
     initializeData();
   }, [initializeData]);
 
-  // Watch for user logout
   useEffect(() => {
     if (!userInfo) {
       fetchProducts();
@@ -92,9 +92,9 @@ const ProductCard = () => {
       setIsAuthOpen(true);
       return;
     }
-  
+
     setLoadingProductIds(prev => new Set([...prev, productId]));
-  
+
     try {
       const response = await addProductToCart(productId);
       if (response?.success) {
@@ -116,8 +116,7 @@ const ProductCard = () => {
   return (
     <>
       {isInitialLoading && <ProductSkelton />}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {products?.map((product) => {
           const isInCart = cartProductIds?.includes(product?._id);
           const isLoading = loadingProductIds?.has(product?._id);
@@ -125,44 +124,44 @@ const ProductCard = () => {
           return (
             <div
               key={product?._id}
-              className="bg-white shadow-md rounded-lg overflow-hidden relative group"
+              className="bg-white rounded-lg shadow-sm overflow-hidden transition-transform duration-300 hover:shadow-md group relative"
             >
               <div className="relative">
                 <img
                   src={product?.imageUrl}
                   alt={product?.name}
-                  className="w-full h-48 object-cover transition-opacity group-hover:opacity-90"
+                  className="w-full h-48 object-cover object-center transition-transform duration-300 group-hover:scale-105"
                 />
-
-                <HoverButtons />
+                <div className="absolute inset-0">
+                  <HoverButtons />
+                </div>
               </div>
 
-              <div className="p-4">
-                <h3 className="text-gray-900 font-bold text-lg mb-2">
+              <div className="p-4 space-y-3">
+                <h3 className="text-gray-900 font-semibold text-lg line-clamp-2">
                   {product?.name}
                 </h3>
+
                 <div className="flex items-center justify-between">
-                  <span className="text-purple-950 font-bold text-base">
-                    ₹{`${product?.price}.00`}
+                  <span className="text-purple-950 font-bold text-lg">
+                    ₹{product?.price?.toFixed(2)}
                   </span>
                 </div>
 
-                {isInCart ? (
-                  <button
-                    onClick={() => navigate('/cart')}
-                    className="mt-4 w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors duration-200"
-                  >
-                    Go to Cart
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleAddToCart(product?._id)}
-                    disabled={isLoading}
-                    className={`mt-4 w-full bg-purple-950 text-white py-2 px-4 rounded hover:bg-purple-900 transition-colors duration-200 ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
-                  >
-                    {isLoading ? 'Adding...' : 'Add To Cart'}
-                  </button>
-                )}
+                <button
+                  onClick={() => isInCart ? navigate('/cart') : handleAddToCart(product?._id)}
+                  disabled={isLoading}
+                  className={`
+                    w-full py-2.5 px-4 rounded-md text-white font-medium transition-colors duration-200
+                    ${isInCart
+                      ? 'bg-green-600 hover:bg-green-700'
+                      : 'bg-purple-950 hover:bg-purple-900'
+                    }
+                    ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}
+                  `}
+                >
+                  {isLoading ? 'Adding...' : isInCart ? 'Go to Cart' : 'Add To Cart'}
+                </button>
               </div>
             </div>
           );
