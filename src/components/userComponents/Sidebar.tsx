@@ -49,16 +49,16 @@ const Sidebar = () => {
                     </button>
                 )}
 
-                <h2 className="text-gray-900 font-bold mb-4">Product Categories</h2>
+                <h2 className="text-gray-900 font-bold mb-4 mt-5 ml-4">Product Categories</h2>
                 <div className="space-y-4">
                     {categories.map((category, index) => (
-                        <div key={index} className="text-gray-600 hover:text-gray-900 cursor-pointer">
+                        <div key={index} className="text-gray-600 hover:text-gray-900 cursor-pointer ml-4">
                             {category.name}
                         </div>
                     ))}
                 </div>
-                <div className="mt-4 border-t border-gray-200 pt-4">
-                    <h2 className="text-gray-900 font-bold mb-4">Filter By Price</h2>
+                <div className="mt-4 border-t border-gray-200 pt-4 ml-4 mb-6 mr-4">
+                    <h2 className="text-gray-900 font-bold mb-4 ">Filter By Price</h2>
                     <div className="flex mt-4 space-x-2">
                         <OutlinedInput
                             type="number"
