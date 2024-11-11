@@ -80,9 +80,12 @@ const Header = () => {
             <div className="flex items-center space-x-2 md:space-x-4">
               {userInfo ? (
                 <div className="flex items-center space-x-2">
-                  <div className="hidden md:flex items-center bg-white px-3 py-2 rounded-full">
-                    <User className="h-5 w-5 text-gray-600 mr-2" />
-                    <span className="text-gray-700 font-medium">Welcome {userInfo.name}</span>
+                  {/* Modified user greeting to be responsive */}
+                  <div className="flex items-center bg-white px-2 md:px-3 py-1 md:py-2 rounded-full">
+                    <User className="h-4 w-4 md:h-5 md:w-5 text-gray-600 mr-1 md:mr-2" />
+                    <span className="text-gray-700 font-medium text-sm md:text-base truncate max-w-[100px] md:max-w-none">
+                      {userInfo.name}
+                    </span>
                   </div>
                   <Popconfirm
                     title="Logout"
@@ -92,8 +95,8 @@ const Header = () => {
                     cancelText="No"
                     okButtonProps={{ danger: true }}
                   >
-                    <button className="focus:outline-none bg-white p-2 rounded-full hover:bg-red-100 transition-colors">
-                      <LogOut className="h-5 w-5 text-red-600" />
+                    <button className="focus:outline-none bg-white p-1.5 md:p-2 rounded-full hover:bg-red-100 transition-colors">
+                      <LogOut className="h-4 w-4 md:h-5 md:w-5 text-red-600" />
                     </button>
                   </Popconfirm>
                 </div>

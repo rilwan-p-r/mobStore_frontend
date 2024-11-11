@@ -13,7 +13,7 @@ import { setCartInfo } from '../../redux/slices/cartSlice';
 
 const ProductCard = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [products, setProducts] = useState<Product[]>([]);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [cartProductIds, setCartProductIds] = useState<string[]>([]);
@@ -49,28 +49,43 @@ const ProductCard = () => {
     }
   }, [userInfo?._id, dispatch]);
 
-  const initializeData = useCallback(async () => {
-    setIsInitialLoading(true);
+  const fetchProducts = useCallback(async () => {
     try {
-      if (userInfo?._id) {
-        await fetchCartProducts();
-      }
-
       const productsResponse = await getProducts();
-      console.log(productsResponse);
       if (productsResponse?.success) {
         setProducts(productsResponse?.data);
       }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  }, []);
+
+  const initializeData = useCallback(async () => {
+    setIsInitialLoading(true);
+    try {
+      await Promise.all([
+        fetchProducts(),
+        userInfo?._id ? fetchCartProducts() : Promise.resolve()
+      ]);
     } catch (error) {
       console.error('Error initializing data:', error);
     } finally {
       setIsInitialLoading(false);
     }
-  }, [userInfo, fetchCartProducts]);
+  }, [userInfo?._id, fetchProducts, fetchCartProducts]);
 
+  // Effect to handle initial load and auth changes
   useEffect(() => {
     initializeData();
   }, [initializeData]);
+
+  // Separate effect to handle logout
+  useEffect(() => {
+    if (!userInfo) {
+      setCartProductIds([]);
+      fetchProducts(); // Refetch products when user logs out
+    }
+  }, [userInfo, fetchProducts]);
 
   const handleAddToCart = async (productId: string) => {
     if (!userInfo) {
@@ -157,4 +172,5 @@ const ProductCard = () => {
     </>
   );
 };
+
 export default ProductCard;
